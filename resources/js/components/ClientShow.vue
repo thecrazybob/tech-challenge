@@ -78,7 +78,21 @@
                 <div class="bg-white rounded p-4" v-if="currentTab == 'journals'">
                     <h3 class="mb-3">List of client journals</h3>
 
-                    <p>(BONUS) TODO: implement this feature</p>
+                    <textarea v-model="newJournalContent" placeholder="Enter new journal content here..."></textarea>
+                    <button class="btn btn-primary" @click="createJournal()">Add Journal Entry</button>
+
+                    <div v-if="client.journals && client.journals.length">
+                        <tr v-for="journal in client.journals" :key="journal.id">
+                            <p><strong>Date:</strong> {{ journal.entry_date }}</p>
+                            <p><strong>Entry:</strong> {{ journal.content }}</p>
+                            <button class="btn btn-danger" @click="deleteJournal(journal)">Delete</button>
+                            <hr/>
+                        </tr>
+                    </div>
+
+                    <div v-else>
+                        <p>No journal entries yet.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -97,6 +111,7 @@ export default {
         return {
             currentTab: 'bookings',
             bookingsFilter: 'all',
+            newJournalContent: "",
         }
     },
 
@@ -136,7 +151,24 @@ export default {
             });
 
             return `${formatDate(startDateTime)}, ${formatTime(startDateTime)} to ${formatTime(endDateTime)}`;
-        }
+        },
+
+        createJournal() {
+            axios.post(`/clients/${this.client.id}/journals`, {
+                content: this.newJournalContent
+            }).then(response => {
+                this.client.journals.push(response.data);
+                this.newJournalContent = "";  // Reset the input
+            }).catch(error => console.error('Error posting journal:', error));
+        },
+
+        deleteJournal(journal) {
+            axios.delete(`/clients/${this.client.id}/journals/${journal.id}`)
+                .then(() => {
+                    this.client.journals = this.client.journals.filter(j => j.id !== journal.id);
+                }).catch(error => console.error('Error deleting journal:', error));
+        },
+
     }
 }
 </script>
