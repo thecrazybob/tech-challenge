@@ -10,7 +10,7 @@ class ClientsController extends Controller
 {
     public function index()
     {
-        $clients = auth()->user()->clients;
+        $clients = auth()->user()->clients()->latest()->get();
 
         foreach ($clients as $client) {
             $client->append('bookings_count');
