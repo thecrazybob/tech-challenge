@@ -41,7 +41,16 @@ export default {
 
     methods: {
         deleteClient(client) {
-            axios.delete(`/clients/${client.id}`);
+            axios.delete(`/clients/${client.id}`)
+                .then(response => {
+                    // Remove the client from the list after successful deletion
+                    this.clients = this.clients.filter(c => c.id !== client.id);
+                    alert('Client deleted successfully.');
+                })
+                .catch(error => {
+                    console.error('There was an error deleting the client:', error);
+                    alert('Failed to delete the client.');
+                });
         }
     }
 }
