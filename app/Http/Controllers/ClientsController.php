@@ -9,7 +9,7 @@ class ClientsController extends Controller
 {
     public function index()
     {
-        $clients = Client::all();
+        $clients = auth()->user()->clients;
 
         foreach ($clients as $client) {
             $client->append('bookings_count');
@@ -26,6 +26,8 @@ class ClientsController extends Controller
     public function show($client)
     {
         $client = Client::with('bookings')->where('id', $client)->first();
+
+        $this->authorize('view', $client);
 
         return view('clients.show', ['client' => $client]);
     }
@@ -47,7 +49,11 @@ class ClientsController extends Controller
 
     public function destroy($client)
     {
-        Client::where('id', $client)->delete();
+        $client = Client::findOrFail($client);
+
+        $this->authorize('delete', $client);
+
+        $client->delete();
 
         return 'Deleted';
     }
